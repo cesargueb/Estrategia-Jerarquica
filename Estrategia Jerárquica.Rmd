@@ -1,0 +1,120 @@
+---
+title: "ENTREGABLE 2 - Condiciones de Vida y Pobreza, Empleo e Ingresos"
+author: "Mauricio Roque, César Guevara y Rolando Meneses"
+date: "11/2/2021"
+output: html_document
+---
+# Importamos la base de datos requerida
+
+## Abrimos nuestra base de datos
+
+```{r}
+library(rio)
+lkCSV="https://raw.githubusercontent.com/cesargueb/TrabajoGrupal/main/subdata.csv"
+subdata=import(lkCSV)
+
+subdata=subdata[!subdata$IngTotalPrin==999999.0000,]
+subdata=subdata[!subdata$IngLiquiPrin==999999.0000,]
+subdata=subdata[!subdata$IngLiquiSecun==999999.0000,]
+```
+
+## Trabajamos sin valores perdidos
+
+```{r}
+subdata=na.omit(subdata)
+
+subdata=subdata[,-c(4)]
+```
+
+## Verificamos los tipos de datos:
+
+```{r}
+subdata$IngTotalPrin=as.numeric(subdata$IngTotalPrin)
+subdata$IngLiquiPrin=as.numeric(subdata$IngLiquiPrin)
+subdata$IngLiquiSecun=as.numeric(subdata$IngLiquiSecun)
+str(subdata)
+```
+
+# Estrategia Jerárquica 
+
+## Calculamos las distancias entre los casos (filas):
+
+```{r}
+library(cluster)
+g.dist=daisy(subdata,metric = "gower")
+```
+
+## Estrategia Aglomerativa 
+
+### 1. Calcular cluster 
+
+```{r}
+set.seed(123)
+library(factoextra)
+
+res.agnes<-hcut(g.dist,k=4,hc_func='agnes',hc_method="ward.D")
+subdata$clustAGL=res.agnes$cluster
+```
+
+### 2. Explorar resultados
+
+```{r}
+library(plyr)
+aggregate(cbind(IngTotalPrin,IngLiquiPrin,IngLiquiSecun)~clustAGL,data=subdata,mean)
+```
+
+
+#### Modificamos los grupos
+
+```{r}
+subdata$clustAGL=dplyr::recode(subdata$clustAGL, `1` = 1, `2`=3,`3`=2,`4`=4)
+
+aggregate(cbind(IngTotalPrin,IngLiquiPrin,IngLiquiSecun)~clustAGL,data=subdata,mean)
+```
+
+
+### 3. Visualizar
+
+```{r}
+fviz_dend(res.agnes,cex = 0.6,horiz = T)
+```
+
+## Estrategia Divisiva
+
+### 1. Calcular clusters
+
+```{r}
+set.seed(123)
+res.diana<-hcut(g.dist,k=4,hc_func = 'diana')
+subdata$clustDIV=res.diana$cluster
+```
+
+### 2. Exploramos resultados
+
+```{r}
+library(plyr)
+aggregate(cbind(IngTotalPrin,IngLiquiPrin,IngLiquiSecun)~clustDIV,data=subdata,mean)
+```
+
+### 3. Recodificamos 
+
+```{r}
+subdata$clustDIV=dplyr::recode(subdata$clustDIV,`1` = 1, `2`=3,`3`=4,`4`=2)
+
+aggregate(cbind(IngTotalPrin,IngLiquiPrin,IngLiquiSecun)~clustDIV,data=subdata,mean)
+```
+
+
+### 4. Visualizamos
+
+```{r}
+fviz_dend(res.diana,cex = 0.8,horiz = T)
+```
+
+
+
+## Comparamos ambas estrategias por jerarquía
+
+```{r}
+table(subdata$clustDIV,subdata$clustAGL,dnn = c('División','Aglomeración'))
+```
