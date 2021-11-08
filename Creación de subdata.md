@@ -1,5 +1,5 @@
 # TrabajoGrupal
-Debido a que la base principal es muy extensa, aquí los comandos para poder exportar los datos que nos interesan y crear, de esta manera, una subadata.
+Debido a que la base principal es muy extensa, aquí los comandos para poder exportar los datos que nos interesan y crear, de esta manera, una subdata.
 
 ## Importamos la data:
 
