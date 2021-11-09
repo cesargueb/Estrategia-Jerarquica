@@ -96,14 +96,12 @@ agregado (cbind ( IngTotalPrin , IngLiquiPrin , IngLiquiSecun ) ~ clustDIV , dat
 
 ###  4. Visualizamos
 
-`` `{r}
+```{r}
 fviz_dend ( res.diana , cex  =  0.8 , horiz  =  T )
-''
-
-
+```
 
 ##  Comparamos ambas estrategias por jerarquía
 
-`` `{r}
+```{r}
 table ( subdata $ clustDIV , subdata $ clustAGL , dnn  = c ( ' División ' , ' Aglomeración ' ))
-''
+```
